@@ -24,6 +24,9 @@
               <!-- <th>REGISTERED</th> -->
               <!-- <th>STATUS</th> -->
           </thead>
+          <tbody v-if="submissions.length == 0">
+            <tr>LOADING...</tr> 
+          </tbody>
           <tbody id="humans_table_body">
               <tr v-for="submission in submissions">
                 <td>{{submission.submissionTime | formatUnix()}}
@@ -40,6 +43,9 @@
       <div class="content has-text-centered">
         <p style="color: hsl(0, 0%, 96%)">
           <b>Something wrong? <a href="https://github.com/isaac-art/listRegistered">Let me know</a></b>
+          <h3>
+            <a href="https://humanity.tools">humanity.tools</a>
+          </h3>
         </p>
       </div>
     </footer>
@@ -55,7 +61,7 @@ export default {
   data () {
     return {
       max: 5000,
-      submissions: null,
+      submissions: [],
     }
   },
   mounted(){
