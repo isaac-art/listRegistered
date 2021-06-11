@@ -157,37 +157,19 @@ export default {
         let data = {"submissions":[]};
         this.submissions = []
 
-        function makeRequest(i) {
-            // console.log("Add promise")
-            return new Promise((resolve) => {
-                let query = "{submissions(where:{registered: true}, first: 500, skip:"+i+"){id creationTime submissionTime status registered name vouchees{id} requests{evidence{sender URI}}}}";
-                let response = axios.post("https://api.thegraph.com/subgraphs/name/kleros/proof-of-humanity-mainnet", {query: query})
-                    .then((res)=>{
-                        // console.log(res.data);
-                        return res;
-                    })
-                    .catch((error)=>{
-                        console.log(error);
-                        return false;
-                    })
-                resolve(response);
-            });
-        }
-
-        async function process(arrayOfPromises) {
-            console.time(`process`);
-            let responses = await Promise.all(arrayOfPromises);
-            let data = {"submissions":[]};
-
-            for(let r of responses) {
-                // console.log("R", r);
-                for (var i = 0; i < r.data.data.submissions.length; i++) {
-                   data["submissions"].push(r.data.data.submissions[i]);
-                }
-            }
-            console.timeEnd(`process`);
-            return data;
-        }
+        while(count <= limit){
+            let query = '{submissions(first: 1000, where: {id_gt:"'+id+'", registered: true}){id creationTime submissionTime status registered name }}';
+            // console.log(query);
+            let response = await axios.post("https://api.thegraph.com/subgraphs/name/kleros/proof-of-humanity-mainnet", {query: query})
+                .then((res)=>{
+                    console.log(res.data);
+                    return res;
+                })
+                .catch((error)=>{
+                    console.log(error);
+                    return false;
+                })
+            if(!response){count = limit+1; return false;}
 
             for (var i = 0; i < response.data.data.submissions.length; i++) {
                this.submissions.push(response.data.data.submissions[i]);
