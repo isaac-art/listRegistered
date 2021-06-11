@@ -11,6 +11,9 @@
         <a class="navbar-item is-primary " @click="downloadAsCSV('humans_table')" >
           <p>DOWNLOAD CSV</p>
         </a>
+        <!-- <a class="navbar-item is-primary " @click="downloadAsMerkleTree()" >
+          <p>MERKLE TREE</p>
+        </a> -->
       </div>
     </nav>
     <div class="table-container" style="max-height: 80vh;overflow: scroll;margin-bottom: 0px;">
@@ -54,13 +57,15 @@
 
 <script>
 import axios from 'axios'
-
+import merkletree from 'merkletreejs'
+import SHA256 from 'crypto-js/sha256'
 import moment from 'moment';
+
 export default {
   name: 'List',
   data () {
     return {
-      max: 5000,
+      max: 500,
       submissions: [],
     }
   },
@@ -75,6 +80,44 @@ export default {
     }
   },
   methods: {
+    downloadAsMerkleTree(){
+      let leaves = []
+      this.submissions.forEach((item, index)=>{
+        leaves.push(item.id)
+      })
+      console.log(leaves)
+      let sha_leaves = leaves.map(x => SHA256(x))
+      console.log(sha_leaves)
+      let tree = new MerkleTree(sha_leaves, SHA256)
+      let root = tree.getRoot().toString('hex')
+      MerkleTree.print(tree);
+      console.log("Root: ",root);
+      // const leaf = SHA256('a')
+      // const proof = tree.getProof(leaf)
+      // console.log(tree.verify(proof, leaf, root))
+      console.info("Compatible with: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol#L6-L10")
+
+      // var link = document.createElement('a');
+      // var filename = 'tree';  
+      // link.style.display = 'none';
+      // link.setAttribute('target', '_blank');
+      // link.setAttribute('href', 'data:text/txt;charset=utf-8,' + encodeURIComponent(tree));
+      // link.setAttribute('download', filename);
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
+
+      var link = document.createElement('a');
+      var filename = 'root';  
+      link.style.display = 'none';
+      link.setAttribute('target', '_blank');
+      link.setAttribute('href', 'data:text/txt;charset=utf-8,' + encodeURIComponent(root));
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+
     downloadAsCSV(table_id, separator = ','){
         // Select rows from table_id
         var rows = document.querySelectorAll('table#' + table_id + ' tr');
@@ -107,7 +150,12 @@ export default {
 
     async multiLoadGraphData(){
         let max = this.max;
-        let inc = 500;
+        let inc = 1000;
+        let id = 0;
+        let count = 0;
+        let limit = 7000;
+        let data = {"submissions":[]};
+        this.submissions = []
 
         function makeRequest(i) {
             // console.log("Add promise")
@@ -141,21 +189,18 @@ export default {
             return data;
         }
 
-        async function handler() {
-            let arrayOfPromises = []
-            for(var i = 0; i < max; i+=inc) {
-                arrayOfPromises.push(makeRequest(i))
+            for (var i = 0; i < response.data.data.submissions.length; i++) {
+               this.submissions.push(response.data.data.submissions[i]);
             }
-            let data = await process(arrayOfPromises);
-            console.log(`processing is complete`);
-            return data;
+            count+=inc;
+            id = String(response.data.data.submissions[response.data.data.submissions.length - 1].id);
+            // console.log("next i ", i);
+            // console.log("next count ", count);
+            this.submissions.sort((a, b) => a.submissionTime - b.submissionTime );
+            // this.submissions = data.submissions;
         }
 
-        let data = await handler();
 
-        data.submissions.sort((a, b) => a.submissionTime - b.submissionTime );
-
-        this.submissions = data.submissions;
     }
 
   }

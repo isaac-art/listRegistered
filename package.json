@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "crypto-js": "^4.0.0",
+    "merkletreejs": "^0.2.18",
     "moment": "^2.29.1",
     "vue": "^2.6.11",
     "vue-moment": "^4.1.0",
