@@ -153,7 +153,7 @@ export default {
         let inc = 1000;
         let id = 0;
         let count = 0;
-        let limit = 11000;
+        let limit = 13000;
         let data = {"submissions":[]};
         this.submissions = []
 
